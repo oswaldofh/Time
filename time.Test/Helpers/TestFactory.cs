@@ -85,7 +85,7 @@ namespace time.Test.Helpers
 
         public static ILogger CreateLogger(LoggerTypes type = LoggerTypes.Null)
         {
-            ILogger logger,
+            ILogger logger;
                 if(type == LoggerTypes.List)
             {
                 logger = new ListLogger();
