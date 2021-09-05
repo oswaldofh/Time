@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using time.Common.Models;
+using time.Functions.Entities;
 using time.Functions.Functions;
 using time.Test.Helpers;
 using Xunit;
@@ -41,7 +42,6 @@ namespace time.Test.Tests
             Guid timeId = Guid.NewGuid();
             DefaultHttpRequest request = TestFactory.CreateHttpRequest(timeId, timeRequest);
 
-
             //Act
             IActionResult response = await TimeApi.UpdateRegister(request, mockTimes, timeId.ToString(), logger);
 
@@ -50,7 +50,6 @@ namespace time.Test.Tests
             Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
 
         }
-
 
     }
 }

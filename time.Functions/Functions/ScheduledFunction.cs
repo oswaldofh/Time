@@ -19,9 +19,9 @@ namespace time.Functions.Functions
             [Table("consolidatedTimes", Connection = "AzureWebJobsStorage")] CloudTable consolidateTimesTable,
             ILogger log)
         {
-            log.LogInformation($"Starting job to consolidate information at: {DateTime.Now}");
+            log.LogInformation($"Starting consolidate information at: {DateTime.Now}");
 
-            // Records not consolidated yet
+            // Registers not consolidated 
             string timeFilter = TableQuery.GenerateFilterConditionForBool(nameof(TimeEntity.Consolidate), QueryComparisons.Equal, false);
             TableQuery<TimeEntity> timeQuery = new TableQuery<TimeEntity>().Where(timeFilter);
             List<TimeEntity> times = (await timeTable.ExecuteQuerySegmentedAsync(timeQuery, null)).OrderBy((x) => x.Date).ToList();
@@ -36,11 +36,11 @@ namespace time.Functions.Functions
 
             foreach (string employee in employees)
             {
-                // Records by employee
+                // Registers by employee
                 List<TimeEntity> employeeTimes = times.Where((time) => time.IdEmployee == employee).ToList();
                 List<string> result = new List<string>();
 
-                // if employee haven't check out delete the last in
+                // if employee haven't checkout 
                 if (employeeTimes.Count % 2 == 1)
                 {
                     employeeTimes.RemoveAt(employeeTimes.Count - 1);
@@ -50,7 +50,7 @@ namespace time.Functions.Functions
                 {
                     DateTime timeDate = time.Date.Date.ToUniversalTime();
 
-                    // if date already has been storaged continue
+                    
                     if (result.FirstOrDefault((date) => date.Equals(timeDate.ToString())) != null)
                     {
                         continue;
@@ -66,7 +66,7 @@ namespace time.Functions.Functions
 
                     List<TimeEntity> timeRegisters = times.Where((x) => x.IdEmployee == employee && x.Date.Date == timeDate).ToList();
 
-                    // reduce records getting minutes
+                    
                     int minutes = timeRegisters.Aggregate(new string[] { "", "0" }, (acum, row) =>
                     {
                         if (row.Type == 0)
@@ -111,7 +111,7 @@ namespace time.Functions.Functions
 
                     foreach (TimeEntity timeRegister in timeRegisters)
                     {
-                        // Update consolidated propperty
+                        // Update consolidated 
                         timeRegister.Consolidate = true;
 
                         TableOperation update = TableOperation.Replace(timeRegister);

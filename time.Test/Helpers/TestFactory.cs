@@ -70,7 +70,6 @@ namespace time.Test.Helpers
                 Type = 1
 
             };
-
         }
 
         public static Stream GenerateStreamFromString(string stringToConvert)

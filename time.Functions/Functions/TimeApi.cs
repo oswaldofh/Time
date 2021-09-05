@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -204,5 +205,68 @@ namespace time.Functions.Functions
             });
         }
 
+        [FunctionName(nameof(GetAllConsolidated))]
+        public static async Task<IActionResult> GetAllConsolidated(
+           [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consolidated")] HttpRequest req,
+            [Table("consolidatedTimes", Connection = "AzureWebJobsStorage")] CloudTable consolidateTimesTable,
+           ILogger log)
+        {
+            log.LogInformation("Get all registers Consolidated .");
+
+            TableQuery<ConsolidatedEntity> query = new TableQuery<ConsolidatedEntity>();
+            TableQuerySegment<ConsolidatedEntity> registers = await consolidateTimesTable.ExecuteQuerySegmentedAsync(query, null);
+
+
+            string message = "Retrieved all Registers Consolidated";
+            log.LogInformation(message);
+
+            return new OkObjectResult(new Response
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = registers
+            });
+        }
+
+
+        [FunctionName(nameof(GetConsolidatedByDate))]
+        public static async Task<IActionResult> GetConsolidatedByDate(
+           [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consolidated/{date}")] HttpRequest req,
+           [Table("consolidatedTimes", Connection = "AzureWebJobsStorage")] CloudTable consolidateTable,
+           string date,
+           ILogger log)
+        {
+            log.LogInformation($"Get all consolidated of: {date} ");
+            DateTime dateTime = DateTime.Parse(date);
+
+            string filter = TableQuery.GenerateFilterCondition("timestamp".ToString(), QueryComparisons.Equal, date);
+            TableQuery<ConsolidatedEntity> query = new TableQuery<ConsolidatedEntity>().Where(filter);
+            TableQuerySegment<ConsolidatedEntity> consolidates = await consolidateTable.ExecuteQuerySegmentedAsync(query, null);
+
+            
+            if (consolidates == null)
+            {
+                return new BadRequestObjectResult(new Response
+                {
+                    IsSuccess = false,
+                    Message = "Registers not found"
+
+                });
+            }
+           
+            
+            string message = $"Registers of: {date}  in Table";
+            log.LogInformation(message);
+
+            return new OkObjectResult(new Response
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = consolidates
+            });
+        }
+
     }
+
 }
+
